@@ -38,7 +38,16 @@ export function Step1Form({ onSubmit }: Step1FormProps) {
   });
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    onSubmit(values);
+    // Ensure all required fields are present for VerificationFormData
+    const formData: VerificationFormData = {
+      name: values.name,
+      registrationNumber: values.registrationNumber,
+      country: values.country,
+      website: values.website || undefined,
+      description: values.description || undefined,
+    };
+    
+    onSubmit(formData);
   };
 
   return (

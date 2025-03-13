@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import MainLayout from '@/components/layout/MainLayout';
-import { CheckCircle, ArrowRight, Building, ShieldCheck } from 'lucide-react';
+import { CheckCircle, ArrowRight, Building, ShieldCheck, CoinIcon } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -78,7 +78,7 @@ const Index = () => {
               viewport={{ once: true }}
             >
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <Bitcoin className="h-6 w-6 text-primary" />
+                <CoinIcon className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Make a Bitcoin Transaction</h3>
               <p className="text-muted-foreground">
