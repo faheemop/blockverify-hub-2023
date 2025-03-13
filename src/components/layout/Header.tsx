@@ -11,7 +11,7 @@ const Header = () => {
           <img 
             src="/blockstone-logo.png" 
             alt="Blockstone" 
-            className="h-8 md:h-10"
+            className="h-8 md:h-10 w-auto"
           />
         </Link>
 
