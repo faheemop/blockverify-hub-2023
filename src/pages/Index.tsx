@@ -38,19 +38,19 @@ const Index = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="inline-block px-3 py-1 mb-6 text-xs font-medium rounded-full bg-primary/10 text-primary">
-              Bitcoin Verification System
+              ✅ Bitcoin Company Verification
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Put Your Bitcoin to Work – Securely & Transparently
+              Turn Your Business into a Real Bitcoin Company
             </h1>
             <p className="text-lg mb-8 text-muted-foreground">
-              BlockSt.one helps businesses verify and leverage Bitcoin ownership securely 
-              using Bitcoin OP_RETURN data to prove ownership of your business
+              Put your business directly on the Bitcoin blockchain through BlockStone.
+              Fast, transparent, and reliable
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button asChild size="lg" className="rounded-full px-6">
                 <Link to="/verify">
-                  <span>Get Verified</span>
+                  <span>✅ Verify your business today!</span>
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -128,7 +128,7 @@ const Index = () => {
       <section className="py-16">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Why Choose BlockSt.one?</h2>
+            <h2 className="text-3xl font-bold mb-4">Why Choose BlockStone?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Our platform offers unique benefits for businesses looking to leverage their Bitcoin holdings
             </p>

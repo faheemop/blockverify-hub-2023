@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -8,9 +7,10 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="text-sm text-muted-foreground mb-4 md:mb-0">
-            © {new Date().getFullYear()} BlockVerify. All rights reserved.
+            © {new Date().getFullYear()} BlockStone. All rights reserved.
           </div>
-          <div className="flex items-center space-x-6">
+          {/* Only show on mobile */}
+          <div className="flex items-center space-x-6 md:hidden">
             <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Home
             </Link>
