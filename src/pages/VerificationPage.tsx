@@ -32,7 +32,13 @@ const VerificationPage = () => {
   
   const handleFormSubmit = (data: VerificationFormData) => {
     setFormData(data);
-    setOpReturnData(`Company ${data.country}#${data.registrationNumber}`);
+    
+    // Generate a company slug from the name (lowercase, no spaces, no special chars)
+    const companySlug = data.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    
+    // Set the OP_RETURN data to include the country, registration number and blockst.one URL
+    setOpReturnData(`${data.country}#${data.registrationNumber} blockst.one/${companySlug}`);
+    
     // In a real app, we'd call an API to generate a Bitcoin address here
     setActiveStep('step2');
     toast.success('Business details saved, proceed to make payment');
