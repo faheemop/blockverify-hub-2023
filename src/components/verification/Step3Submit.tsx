@@ -9,17 +9,18 @@ import { CardDescription } from '@/components/ui/card';
 import { Link } from '@/components/ui/link';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { CheckCircle, ExternalLink } from 'lucide-react';
+import { CheckCircle, ExternalLink, Loader2 } from 'lucide-react';
 
 interface Step3SubmitProps {
   onSubmit: (txId: string) => void;
+  isLoading?: boolean;
 }
 
 const formSchema = z.object({
   txId: z.string().min(64, { message: 'Transaction ID must be 64 characters' }).max(64, { message: 'Transaction ID must be 64 characters' }),
 });
 
-export function Step3Submit({ onSubmit }: Step3SubmitProps) {
+export function Step3Submit({ onSubmit, isLoading = false }: Step3SubmitProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -91,8 +92,15 @@ export function Step3Submit({ onSubmit }: Step3SubmitProps) {
           </CardContent>
           
           <CardFooter className="flex justify-end">
-            <Button type="submit">
-              Submit Transaction ID
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Submit Transaction ID'
+              )}
             </Button>
           </CardFooter>
         </form>

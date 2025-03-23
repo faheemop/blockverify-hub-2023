@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Building } from 'lucide-react';
+import { Building, Loader2 } from 'lucide-react';
 import { VerificationFormData } from '@/types';
 
 interface Step1FormProps {
   onSubmit: (data: VerificationFormData) => void;
+  isLoading?: boolean;
 }
 
 const formSchema = z.object({
@@ -25,7 +26,7 @@ const formSchema = z.object({
   description: z.string().max(500, { message: 'Description must be at most 500 characters' }).optional(),
 });
 
-export function Step1Form({ onSubmit }: Step1FormProps) {
+export function Step1Form({ onSubmit, isLoading = false }: Step1FormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -151,8 +152,15 @@ export function Step1Form({ onSubmit }: Step1FormProps) {
           </CardContent>
           
           <CardFooter className="flex justify-end">
-            <Button type="submit">
-              Continue
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Continue'
+              )}
             </Button>
           </CardFooter>
         </form>

@@ -1,23 +1,23 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
 import MainLayout from '@/components/layout/MainLayout';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { QrCode, Copy, CheckCircle, ArrowRight } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Step1Form } from '@/components/verification/Step1Form';
 import { Step2QR } from '@/components/verification/Step2QR';
 import { Step3Submit } from '@/components/verification/Step3Submit';
 import { VerificationFormData } from '@/types';
+import { submitVerification, submitTransactionId } from '@/services/companyService';
 
 type VerificationStep = 'step1' | 'step2' | 'step3';
 
 const VerificationPage = () => {
+  const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState<VerificationStep>('step1');
   const [formData, setFormData] = useState<VerificationFormData>({
     name: '',
@@ -26,22 +26,58 @@ const VerificationPage = () => {
     website: '',
     description: '',
   });
-  const [bitcoinAddress, setBitcoinAddress] = useState<string>('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh');
+  const [bitcoinAddress, setBitcoinAddress] = useState<string>('');
   const [opReturnData, setOpReturnData] = useState<string>('');
-  const [txId, setTxId] = useState<string>('');
+  const [companyId, setCompanyId] = useState<string>('');
+  
+  // Submit verification form mutation
+  const verificationMutation = useMutation({
+    mutationFn: submitVerification,
+    onSuccess: (data) => {
+      setCompanyId(data.id);
+      setBitcoinAddress(data.bitcoinAddress || '');
+      
+      // Generate a company slug from the name (lowercase, no spaces, no special chars)
+      const companySlug = data.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      
+      // Set the OP_RETURN data to include the country, registration number and blockst.one URL
+      setOpReturnData(`${data.country}#${data.registrationNumber} blockst.one/${companySlug}`);
+      
+      setActiveStep('step2');
+      toast.success('Business details saved, proceed to make payment');
+    },
+    onError: (error) => {
+      toast.error('Failed to submit verification', {
+        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      });
+    }
+  });
+  
+  // Submit transaction ID mutation
+  const txIdMutation = useMutation({
+    mutationFn: (txId: string) => submitTransactionId(companyId, txId),
+    onSuccess: (data) => {
+      toast.success('Transaction ID submitted successfully');
+      
+      // Navigate to the company page
+      window.setTimeout(() => {
+        toast('Your verification request has been received and is pending review.', {
+          description: 'We will notify you once verified.',
+          icon: <CheckCircle className="h-5 w-5 text-green-500" />,
+        });
+        navigate(`/company/${data.id}`);
+      }, 1500);
+    },
+    onError: (error) => {
+      toast.error('Failed to submit transaction ID', {
+        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      });
+    }
+  });
   
   const handleFormSubmit = (data: VerificationFormData) => {
     setFormData(data);
-    
-    // Generate a company slug from the name (lowercase, no spaces, no special chars)
-    const companySlug = data.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-    
-    // Set the OP_RETURN data to include the country, registration number and blockst.one URL
-    setOpReturnData(`${data.country}#${data.registrationNumber} blockst.one/${companySlug}`);
-    
-    // In a real app, we'd call an API to generate a Bitcoin address here
-    setActiveStep('step2');
-    toast.success('Business details saved, proceed to make payment');
+    verificationMutation.mutate(data);
   };
   
   const handlePaymentConfirmation = () => {
@@ -49,15 +85,7 @@ const VerificationPage = () => {
   };
   
   const handleTxIdSubmit = (txId: string) => {
-    setTxId(txId);
-    toast.success('Transaction ID submitted successfully');
-    // In a real app, we'd submit this to our backend
-    window.setTimeout(() => {
-      toast('Your verification request has been received and is pending review.', {
-        description: 'We will notify you once verified.',
-        icon: <CheckCircle className="h-5 w-5 text-green-500" />,
-      });
-    }, 1500);
+    txIdMutation.mutate(txId);
   };
   
   return (
@@ -105,7 +133,7 @@ const VerificationPage = () => {
             
             <div className="bg-card rounded-lg border shadow-card overflow-hidden">
               <TabsContent value="step1" className="m-0">
-                <Step1Form onSubmit={handleFormSubmit} />
+                <Step1Form onSubmit={handleFormSubmit} isLoading={verificationMutation.isPending} />
               </TabsContent>
               
               <TabsContent value="step2" className="m-0">
@@ -117,7 +145,7 @@ const VerificationPage = () => {
               </TabsContent>
               
               <TabsContent value="step3" className="m-0">
-                <Step3Submit onSubmit={handleTxIdSubmit} />
+                <Step3Submit onSubmit={handleTxIdSubmit} isLoading={txIdMutation.isPending} />
               </TabsContent>
             </div>
           </Tabs>
