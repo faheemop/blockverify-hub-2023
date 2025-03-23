@@ -55,35 +55,44 @@ export const submitVerification = async (formData: VerificationFormData): Promis
     // In a production app, you would use a proper Bitcoin address generation service
     const bitcoinAddress = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'; 
 
+    const companyData = {
+      name: formData.name,
+      registration_number: formData.registrationNumber,
+      country: formData.country,
+      website: formData.website || null,
+      description: formData.description || null,
+      bitcoin_address: bitcoinAddress,
+      verification_status: 'pending',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    console.log('Submitting company data:', companyData);
+
     const { data, error } = await supabase
       .from('companies')
-      .insert({
-        name: formData.name,
-        registration_number: formData.registrationNumber,
-        country: formData.country,
-        website: formData.website || null,
-        description: formData.description || null,
-        bitcoin_address: bitcoinAddress,
-        verification_status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
+      .insert(companyData)
       .select()
       .single();
 
     if (error) {
       console.error('Error submitting verification:', error);
-      throw new Error(`Failed to submit verification: ${error.message}`);
+      throw new Error(`Failed to submit verification: ${error.message || 'Database error occurred'}`);
     }
 
     if (!data) {
+      console.error('No data returned from submission');
       throw new Error('No data returned from submission');
     }
 
     return mapRowToCompany(data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in submitVerification:', error);
-    throw error;
+    if (error instanceof Error) {
+      throw error;
+    } else {
+      throw new Error(`Failed to submit verification: ${error?.message || 'Unknown error occurred'}`);
+    }
   }
 };
 
