@@ -29,7 +29,7 @@ export const getAllCompanies = async (): Promise<Company[]> => {
     throw new Error(error.message);
   }
 
-  return data.map(mapRowToCompany);
+  return data ? data.map(mapRowToCompany) : [];
 };
 
 // Get a single company by ID
@@ -50,32 +50,41 @@ export const getCompanyById = async (id: string): Promise<Company | null> => {
 
 // Submit a new verification request
 export const submitVerification = async (formData: VerificationFormData): Promise<Company> => {
-  // Generate a Bitcoin address for this company
-  // In a production app, you would use a proper Bitcoin address generation service
-  const bitcoinAddress = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'; 
+  try {
+    // Generate a Bitcoin address for this company
+    // In a production app, you would use a proper Bitcoin address generation service
+    const bitcoinAddress = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'; 
 
-  const { data, error } = await supabase
-    .from('companies')
-    .insert({
-      name: formData.name,
-      registration_number: formData.registrationNumber,
-      country: formData.country,
-      website: formData.website || null,
-      description: formData.description || null,
-      bitcoin_address: bitcoinAddress,
-      verification_status: 'pending',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .select()
-    .single();
+    const { data, error } = await supabase
+      .from('companies')
+      .insert({
+        name: formData.name,
+        registration_number: formData.registrationNumber,
+        country: formData.country,
+        website: formData.website || null,
+        description: formData.description || null,
+        bitcoin_address: bitcoinAddress,
+        verification_status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
 
-  if (error) {
-    console.error('Error submitting verification:', error);
-    throw new Error(error.message);
+    if (error) {
+      console.error('Error submitting verification:', error);
+      throw new Error(`Failed to submit verification: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error('No data returned from submission');
+    }
+
+    return mapRowToCompany(data);
+  } catch (error) {
+    console.error('Error in submitVerification:', error);
+    throw error;
   }
-
-  return mapRowToCompany(data);
 };
 
 // Submit transaction ID for verification

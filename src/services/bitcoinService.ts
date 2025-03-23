@@ -38,6 +38,6 @@ export const verifyOpReturn = async (txId: string, expectedData: string): Promis
     return false;
   } catch (error) {
     console.error('Error verifying OP_RETURN:', error);
-    throw error;
+    return false; // Changed to return false instead of throwing, so verification can continue even if blockchain API fails
   }
 };
