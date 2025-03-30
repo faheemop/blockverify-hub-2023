@@ -15,7 +15,7 @@ import { CheckCircle, ExternalLink, Loader2 } from 'lucide-react';
 interface Step3SubmitProps {
   onSubmit: (txId: string) => void;
   isLoading?: boolean;
-  opReturnData?: string; // Added to store OP_RETURN data
+  opReturnData?: string;
 }
 
 const formSchema = z.object({

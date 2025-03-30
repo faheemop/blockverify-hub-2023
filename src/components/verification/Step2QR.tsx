@@ -109,7 +109,13 @@ export function Step2QR({ bitcoinAddress, opReturnData, onProceed }: Step2QRProp
       </CardContent>
       
       <CardFooter className="flex justify-end">
-        <Button onClick={onProceed} className="flex items-center">
+        <Button
+          onClick={() => {
+            console.log('Button clicked, calling onProceed');
+            onProceed();
+          }}
+          className="flex items-center"
+        >
           <span>I've made the payment</span>
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>

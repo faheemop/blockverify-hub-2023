@@ -67,7 +67,7 @@ const VerificationPage = () => {
   };
   
   const handlePaymentConfirmation = () => {
-    setActiveStep('step2');
+    setActiveStep('step3');
   };
   
   const handleTxIdSubmit = (txId: string) => {
