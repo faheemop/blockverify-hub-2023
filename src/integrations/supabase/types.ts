@@ -9,7 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          bitcoin_address: string
+          country: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          registration_number: string
+          transaction_id: string | null
+          updated_at: string
+          verification_status: string
+          website: string | null
+        }
+        Insert: {
+          bitcoin_address: string
+          country: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          registration_number: string
+          transaction_id?: string | null
+          updated_at?: string
+          verification_status?: string
+          website?: string | null
+        }
+        Update: {
+          bitcoin_address?: string
+          country?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          registration_number?: string
+          transaction_id?: string | null
+          updated_at?: string
+          verification_status?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

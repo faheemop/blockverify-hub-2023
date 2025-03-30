@@ -1,5 +1,5 @@
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Company, VerificationFormData } from '@/types';
 
 // Helper function to convert Supabase row to our frontend Company type
@@ -51,9 +51,10 @@ export const getCompanyById = async (id: string): Promise<Company | null> => {
 // Submit a new verification request
 export const submitVerification = async (formData: VerificationFormData): Promise<Company> => {
   try {
-    // Generate a Bitcoin address for this company
+    // Generate a unique Bitcoin address for this company
     // In a production app, you would use a proper Bitcoin address generation service
-    const bitcoinAddress = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'; 
+    // This is a placeholder for demonstration purposes
+    const bitcoinAddress = `bc1q${Math.random().toString(36).substring(2, 15)}`;
 
     const companyData = {
       name: formData.name,
@@ -63,8 +64,6 @@ export const submitVerification = async (formData: VerificationFormData): Promis
       description: formData.description || null,
       bitcoin_address: bitcoinAddress,
       verification_status: 'pending',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     };
 
     console.log('Submitting company data:', companyData);

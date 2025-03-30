@@ -4,7 +4,7 @@ const BLOCKCYPHER_API = 'https://api.blockcypher.com/v1/btc/main';
 const BLOCKCYPHER_TOKEN = '9f78f0aedf3a4c0b8641f1bf63fb1d30';
 
 // Secondary blockchain explorer API (Blockstream)
-const BLOCKCHAIN_API = 'https://blockstream.info/api';
+const BLOCKSTREAM_API = 'https://blockstream.info/api';
 
 // Get transaction details using Blockcypher API (primary)
 export const getTransactionDetails = async (txId: string) => {
@@ -26,7 +26,7 @@ export const getTransactionDetails = async (txId: string) => {
 // Get transaction details using Blockstream API (fallback)
 export const getTransactionDetailsFromBlockstream = async (txId: string) => {
   try {
-    const response = await fetch(`${BLOCKCHAIN_API}/tx/${txId}`);
+    const response = await fetch(`${BLOCKSTREAM_API}/tx/${txId}`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch transaction details from Blockstream: ${response.statusText}`);
@@ -71,6 +71,7 @@ export const verifyOpReturn = async (txId: string, expectedData: string): Promis
       for (const output of tx.vout) {
         if (
           output.scriptpubkey_type === 'op_return' && 
+          output.scriptpubkey_asm.includes('OP_RETURN') && 
           output.scriptpubkey_asm.includes(expectedData)
         ) {
           return true;
