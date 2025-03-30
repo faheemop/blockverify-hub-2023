@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { getAllCompanies } from '@/services/companyService';
+import { getAllCompanies } from '@/services/company/companyQueryService';
 
 // Import our refactored components
 import { LoadingState } from '@/components/admin/LoadingState';

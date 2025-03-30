@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +11,7 @@ import { Step1Form } from '@/components/verification/Step1Form';
 import { Step2QR } from '@/components/verification/Step2QR';
 import { Step3Submit } from '@/components/verification/Step3Submit';
 import { VerificationFormData } from '@/types';
-import { submitVerification, submitTransactionId } from '@/services/companyService';
+import { submitVerification, submitTransactionId } from '@/services/company';
 
 type VerificationStep = 'step1' | 'step2' | 'step3';
 
@@ -30,17 +29,14 @@ const VerificationPage = () => {
   const [opReturnData, setOpReturnData] = useState<string>('');
   const [companyId, setCompanyId] = useState<string>('');
   
-  // Submit verification form mutation
   const verificationMutation = useMutation({
     mutationFn: submitVerification,
     onSuccess: (data) => {
       setCompanyId(data.id);
       setBitcoinAddress(data.bitcoinAddress || '');
       
-      // Generate a company slug from the name (lowercase, no spaces, no special chars)
       const companySlug = data.name.toLowerCase().replace(/[^a-z0-9]/g, '');
       
-      // Set the OP_RETURN data to include the country, registration number and blockst.one URL
       setOpReturnData(`${data.country}#${data.registrationNumber} blockst.one/${companySlug}`);
       
       setActiveStep('step2');
@@ -53,13 +49,10 @@ const VerificationPage = () => {
     }
   });
   
-  // Submit transaction ID mutation
   const txIdMutation = useMutation({
     mutationFn: (txId: string) => submitTransactionId(companyId, txId),
     onSuccess: (data) => {
       toast.success('Transaction ID submitted successfully');
-      
-      // The navigation will now happen in the Step3Submit component
     },
     onError: (error) => {
       toast.error('Failed to submit transaction ID', {
@@ -74,7 +67,7 @@ const VerificationPage = () => {
   };
   
   const handlePaymentConfirmation = () => {
-    setActiveStep('step3');
+    setActiveStep('step2');
   };
   
   const handleTxIdSubmit = (txId: string) => {

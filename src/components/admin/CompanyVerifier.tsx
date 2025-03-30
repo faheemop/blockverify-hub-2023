@@ -5,7 +5,7 @@ import { Company } from '@/types';
 import { CompaniesTable } from './CompaniesTable';
 import { CompanyFilters } from './CompanyFilters';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateVerificationStatus } from '@/services/companyService';
+import { updateVerificationStatus } from '@/services/company/verificationService';
 import { verifyOpReturn } from '@/services/bitcoinService';
 import { getTransactionDetails } from '@/services/bitcoinService';
 

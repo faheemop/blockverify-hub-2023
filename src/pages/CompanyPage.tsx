@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -9,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Globe, ExternalLink, Copy, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
-import { getCompanyById } from '@/services/companyService';
+import { getCompanyById } from '@/services/company/companyQueryService';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const CompanyPage = () => {
