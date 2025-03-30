@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -14,13 +15,15 @@ import { CheckCircle, ExternalLink, Loader2 } from 'lucide-react';
 interface Step3SubmitProps {
   onSubmit: (txId: string) => void;
   isLoading?: boolean;
+  opReturnData?: string; // Added to store OP_RETURN data
 }
 
 const formSchema = z.object({
   txId: z.string().min(64, { message: 'Transaction ID must be 64 characters' }).max(64, { message: 'Transaction ID must be 64 characters' }),
 });
 
-export function Step3Submit({ onSubmit, isLoading = false }: Step3SubmitProps) {
+export function Step3Submit({ onSubmit, isLoading = false, opReturnData }: Step3SubmitProps) {
+  const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -28,8 +31,21 @@ export function Step3Submit({ onSubmit, isLoading = false }: Step3SubmitProps) {
     },
   });
 
+  // Store OP_RETURN data in localStorage when available
+  useEffect(() => {
+    if (opReturnData) {
+      localStorage.setItem('opReturnData', opReturnData);
+    }
+  }, [opReturnData]);
+
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    // Call the parent component's onSubmit
     onSubmit(values.txId);
+    
+    // Navigate to verification status page
+    window.setTimeout(() => {
+      navigate(`/verification-status/${values.txId}`);
+    }, 1000); // Short delay to allow the API call to start
   };
   
   return (
@@ -84,9 +100,9 @@ export function Step3Submit({ onSubmit, isLoading = false }: Step3SubmitProps) {
             <div className="bg-secondary p-4 rounded-lg text-sm">
               <p className="font-medium mb-2">What happens next?</p>
               <p className="text-muted-foreground">
-                After submitting, our team will verify your transaction on the Bitcoin blockchain. 
-                Once confirmed, your business will receive a verification badge and a dedicated 
-                verification page to share with your customers.
+                After submitting, our system will verify your transaction on the Bitcoin blockchain. 
+                You'll be taken to a verification status page where you can see the current status
+                and confirmation count of your transaction.
               </p>
             </div>
           </CardContent>

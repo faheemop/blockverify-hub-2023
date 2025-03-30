@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import VerificationPage from "./pages/VerificationPage";
+import VerificationStatusPage from "./pages/VerificationStatusPage";
 import CompanyPage from "./pages/CompanyPage";
 import AdminPage from "./pages/AdminPage";
 import LoginPage from "./pages/LoginPage";
@@ -27,6 +28,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/verify" element={<VerificationPage />} />
+              <Route path="/verification-status/:txId" element={<VerificationStatusPage />} />
               <Route path="/company/:companyId" element={<CompanyPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/admin" element={

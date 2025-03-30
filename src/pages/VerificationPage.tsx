@@ -59,14 +59,7 @@ const VerificationPage = () => {
     onSuccess: (data) => {
       toast.success('Transaction ID submitted successfully');
       
-      // Navigate to the company page
-      window.setTimeout(() => {
-        toast('Your verification request has been received and is pending review.', {
-          description: 'We will notify you once verified.',
-          icon: <CheckCircle className="h-5 w-5 text-green-500" />,
-        });
-        navigate(`/company/${data.id}`);
-      }, 1500);
+      // The navigation will now happen in the Step3Submit component
     },
     onError: (error) => {
       toast.error('Failed to submit transaction ID', {
@@ -145,7 +138,11 @@ const VerificationPage = () => {
               </TabsContent>
               
               <TabsContent value="step3" className="m-0">
-                <Step3Submit onSubmit={handleTxIdSubmit} isLoading={txIdMutation.isPending} />
+                <Step3Submit 
+                  onSubmit={handleTxIdSubmit} 
+                  isLoading={txIdMutation.isPending} 
+                  opReturnData={opReturnData} 
+                />
               </TabsContent>
             </div>
           </Tabs>
