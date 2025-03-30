@@ -1,30 +1,13 @@
 
-// Primary blockchain explorer API (Blockstream)
-const BLOCKCHAIN_API = 'https://blockstream.info/api';
-
-// Secondary blockchain explorer API (Blockcypher)
+// Primary blockchain explorer API (Blockcypher)
 const BLOCKCYPHER_API = 'https://api.blockcypher.com/v1/btc/main';
 const BLOCKCYPHER_TOKEN = '9f78f0aedf3a4c0b8641f1bf63fb1d30';
 
-// Get transaction details using Blockstream API (primary)
-export const getTransactionDetails = async (txId: string) => {
-  try {
-    const response = await fetch(`${BLOCKCHAIN_API}/tx/${txId}`);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch transaction details: ${response.statusText}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching transaction details from Blockstream:', error);
-    // Try fallback to Blockcypher if primary API fails
-    return getTransactionDetailsFromBlockcypher(txId);
-  }
-};
+// Secondary blockchain explorer API (Blockstream)
+const BLOCKCHAIN_API = 'https://blockstream.info/api';
 
-// Get transaction details using Blockcypher API (fallback)
-export const getTransactionDetailsFromBlockcypher = async (txId: string) => {
+// Get transaction details using Blockcypher API (primary)
+export const getTransactionDetails = async (txId: string) => {
   try {
     const response = await fetch(`${BLOCKCYPHER_API}/txs/${txId}?token=${BLOCKCYPHER_TOKEN}`);
     
@@ -35,6 +18,23 @@ export const getTransactionDetailsFromBlockcypher = async (txId: string) => {
     return await response.json();
   } catch (error) {
     console.error('Error fetching transaction details from Blockcypher:', error);
+    // Try fallback to Blockstream if primary API fails
+    return getTransactionDetailsFromBlockstream(txId);
+  }
+};
+
+// Get transaction details using Blockstream API (fallback)
+export const getTransactionDetailsFromBlockstream = async (txId: string) => {
+  try {
+    const response = await fetch(`${BLOCKCHAIN_API}/tx/${txId}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch transaction details from Blockstream: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching transaction details from Blockstream:', error);
     throw error;
   }
 };
@@ -42,36 +42,36 @@ export const getTransactionDetailsFromBlockcypher = async (txId: string) => {
 // Verify OP_RETURN data in a transaction
 export const verifyOpReturn = async (txId: string, expectedData: string): Promise<boolean> => {
   try {
-    // First try Blockstream API
+    // First try Blockcypher API (primary)
     try {
-      const tx = await getTransactionDetails(txId);
+      const txBlockcypher = await getTransactionDetails(txId);
       
-      // Look for OP_RETURN outputs in Blockstream format
-      if (tx && tx.vout) {
-        for (const output of tx.vout) {
+      // Look for OP_RETURN outputs in Blockcypher format
+      if (txBlockcypher && txBlockcypher.outputs) {
+        for (const output of txBlockcypher.outputs) {
           if (
-            output.scriptpubkey_type === 'op_return' && 
-            output.scriptpubkey_asm.includes(expectedData)
+            output.script_type === 'null-data' && 
+            output.data_hex && 
+            hexToAscii(output.data_hex).includes(expectedData)
           ) {
             return true;
           }
         }
       }
-    } catch (blockstreamError) {
-      console.log('Blockstream verification failed, trying Blockcypher...', blockstreamError);
-      // If Blockstream fails, we continue to try Blockcypher
+    } catch (blockcypherError) {
+      console.log('Blockcypher verification failed, trying Blockstream...', blockcypherError);
+      // If Blockcypher fails, we continue to try Blockstream
     }
 
-    // If we reach here, try with Blockcypher API
-    const txBlockcypher = await getTransactionDetailsFromBlockcypher(txId);
+    // If we reach here, try with Blockstream API
+    const tx = await getTransactionDetailsFromBlockstream(txId);
     
-    // Look for OP_RETURN outputs in Blockcypher format
-    if (txBlockcypher && txBlockcypher.outputs) {
-      for (const output of txBlockcypher.outputs) {
+    // Look for OP_RETURN outputs in Blockstream format
+    if (tx && tx.vout) {
+      for (const output of tx.vout) {
         if (
-          output.script_type === 'null-data' && 
-          output.data_hex && 
-          hexToAscii(output.data_hex).includes(expectedData)
+          output.scriptpubkey_type === 'op_return' && 
+          output.scriptpubkey_asm.includes(expectedData)
         ) {
           return true;
         }
@@ -113,7 +113,7 @@ export const getAddressDetails = async (address: string) => {
 // Utility function to check if a Bitcoin transaction has been confirmed
 export const checkTransactionConfirmations = async (txId: string): Promise<number> => {
   try {
-    const txDetails = await getTransactionDetailsFromBlockcypher(txId);
+    const txDetails = await getTransactionDetails(txId);
     return txDetails.confirmations || 0;
   } catch (error) {
     console.error('Error checking transaction confirmations:', error);
