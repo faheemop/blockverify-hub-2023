@@ -2,8 +2,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import wasm from "vite-plugin-wasm";
-import topLevelAwait from "vite-plugin-top-level-await";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
@@ -14,8 +12,6 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    wasm(),
-    topLevelAwait(),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
@@ -30,15 +26,9 @@ export default defineConfig(({ mode }) => ({
       supported: {
         bigint: true
       }
-    },
-    // Explicitly exclude wasm files from optimization
-    exclude: ['*.wasm']
+    }
   },
   build: {
-    target: 'es2020',
-    rollupOptions: {
-      // Explicitly tell Rollup how to handle .wasm files
-      external: [/\.wasm$/]
-    }
+    target: 'es2020'
   },
 }));
