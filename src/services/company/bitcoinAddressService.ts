@@ -4,6 +4,7 @@ import * as ecc from 'tiny-secp256k1';
 import { ECPairFactory } from 'ecpair';
 
 // Initialize elliptic curve dependency
+bitcoin.initEccLib(ecc);
 const ECPair = ECPairFactory(ecc);
 
 /**

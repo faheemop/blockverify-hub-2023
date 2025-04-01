@@ -23,9 +23,18 @@ export default defineConfig(({ mode }) => ({
   optimizeDeps: {
     esbuildOptions: {
       target: 'es2020',
+      supported: {
+        bigint: true
+      }
     },
+    // Explicitly exclude wasm files from optimization
+    exclude: ['*.wasm']
   },
   build: {
     target: 'es2020',
+    rollupOptions: {
+      // Explicitly tell Rollup how to handle .wasm files
+      external: [/\.wasm$/]
+    }
   },
 }));
