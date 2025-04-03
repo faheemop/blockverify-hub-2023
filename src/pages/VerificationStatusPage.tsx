@@ -7,17 +7,25 @@ import { VerificationStatus } from '@/components/verification/VerificationStatus
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Home, ArrowLeft } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 const VerificationStatusPage = () => {
   const { txId } = useParams<{ txId: string }>();
   const [expectedData, setExpectedData] = useState<string>('');
+  const [verificationStatus, setVerificationStatus] = useState<'pending' | 'verified' | 'rejected'>('pending');
   
   useEffect(() => {
     // In a real app, you would fetch this from your backend
     // For now, we'll use a placeholder or get it from localStorage if available
     const storedData = localStorage.getItem('opReturnData');
     setExpectedData(storedData || 'blockst.one');
-  }, []);
+    
+    // Check if we have stored verification status
+    const storedStatus = localStorage.getItem(`verification_status_${txId}`);
+    if (storedStatus && (storedStatus === 'verified' || storedStatus === 'rejected')) {
+      setVerificationStatus(storedStatus as 'verified' | 'rejected');
+    }
+  }, [txId]);
   
   return (
     <MainLayout>
@@ -39,7 +47,11 @@ const VerificationStatusPage = () => {
           </div>
           
           {txId ? (
-            <VerificationStatus txId={txId} expectedData={expectedData} />
+            <VerificationStatus 
+              txId={txId} 
+              expectedData={expectedData} 
+              initialStatus={verificationStatus}
+            />
           ) : (
             <div className="text-center py-16">
               <h2 className="text-xl font-medium mb-4">No Transaction ID Provided</h2>

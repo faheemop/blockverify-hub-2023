@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { checkTransactionConfirmations, verifyOpReturn } from '@/services/bitcoinService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,21 +5,44 @@ import { Badge } from '@/components/ui/badge';
 import { Check, AlertCircle, Clock, ExternalLink, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface VerificationStatusProps {
   txId: string;
   expectedData: string;
   onRefresh?: () => void;
+  initialStatus?: 'pending' | 'verified' | 'rejected';
 }
 
-export function VerificationStatus({ txId, expectedData, onRefresh }: VerificationStatusProps) {
-  const [status, setStatus] = useState<'loading' | 'verified' | 'unverified' | 'error'>('loading');
+export function VerificationStatus({ 
+  txId, 
+  expectedData, 
+  onRefresh,
+  initialStatus 
+}: VerificationStatusProps) {
+  const [status, setStatus] = useState<'loading' | 'verified' | 'unverified' | 'error'>(
+    initialStatus === 'verified' ? 'verified' : 'loading'
+  );
   const [confirmations, setConfirmations] = useState<number>(0);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const verifyTransaction = async () => {
     try {
       setIsRefreshing(true);
+      
+      // If the company is already verified, keep that status
+      if (initialStatus === 'verified') {
+        setStatus('verified');
+        // Still check confirmations
+        try {
+          const confirmCount = await checkTransactionConfirmations(txId);
+          setConfirmations(confirmCount);
+        } catch (err) {
+          console.error('Error checking confirmations:', err);
+        }
+        return;
+      }
       
       // Check if transaction has OP_RETURN data
       const isVerified = await verifyOpReturn(txId, expectedData);
@@ -36,6 +58,9 @@ export function VerificationStatus({ txId, expectedData, onRefresh }: Verificati
       }
     } catch (error) {
       console.error('Verification error:', error);
+      toast.error('Failed to verify transaction', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      });
       setStatus('error');
     } finally {
       setIsRefreshing(false);
@@ -46,10 +71,10 @@ export function VerificationStatus({ txId, expectedData, onRefresh }: Verificati
     if (txId && expectedData) {
       verifyTransaction();
     }
-  }, [txId, expectedData]);
+  }, [txId, expectedData, initialStatus]);
 
   const handleRefresh = () => {
-    setStatus('loading');
+    setStatus(initialStatus === 'verified' ? 'verified' : 'loading');
     verifyTransaction();
     if (onRefresh) onRefresh();
   };
@@ -121,12 +146,12 @@ export function VerificationStatus({ txId, expectedData, onRefresh }: Verificati
             
             <div className="flex justify-between items-center">
               <a
-                href={`https://www.blockchain.com/explorer/transactions/btc/${txId}`}
+                href={`https://www.blockcypher.com/explorer/bitcoin/main/tx/${txId}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-primary hover:underline flex items-center gap-1"
               >
-                View on Blockchain Explorer
+                View on BlockCypher Explorer
                 <ExternalLink className="h-3 w-3" />
               </a>
               

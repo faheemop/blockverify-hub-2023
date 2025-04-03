@@ -25,20 +25,22 @@ export const CompanyActions = ({
         </Link>
       </Button>
       
-      {company.verificationStatus === 'pending' && company.transactionId && (
+      {company.verificationStatus === 'pending' && (
         <>
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={() => onVerifyTransaction(company)}
-            disabled={isPending}
-          >
-            {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              'Verify TX'
-            )}
-          </Button>
+          {company.transactionId && (
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => onVerifyTransaction(company)}
+              disabled={isPending}
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                'Verify TX'
+              )}
+            </Button>
+          )}
           
           <Button 
             size="sm" 
@@ -69,7 +71,7 @@ export const CompanyActions = ({
           asChild
         >
           <a 
-            href={`https://mempool.space/tx/${company.transactionId}`}
+            href={`https://www.blockcypher.com/explorer/bitcoin/main/tx/${company.transactionId}`}
             target="_blank"
             rel="noopener noreferrer"
           >

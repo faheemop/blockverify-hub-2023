@@ -9,30 +9,38 @@ const BLOCKSTREAM_API = 'https://blockstream.info/api';
 // Get transaction details using Blockcypher API (primary)
 export const getTransactionDetails = async (txId: string) => {
   try {
+    console.log(`Fetching transaction ${txId} from BlockCypher...`);
     const response = await fetch(`${BLOCKCYPHER_API}/txs/${txId}?token=${BLOCKCYPHER_TOKEN}`);
     
     if (!response.ok) {
+      console.error(`BlockCypher API error: ${response.status} ${response.statusText}`);
       throw new Error(`Failed to fetch transaction details from Blockcypher: ${response.statusText}`);
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log('BlockCypher transaction data:', data);
+    return data;
   } catch (error) {
     console.error('Error fetching transaction details from Blockcypher:', error);
-    // Try fallback to Blockstream if primary API fails
-    return getTransactionDetailsFromBlockstream(txId);
+    // Don't fall back to Blockstream, just throw the error
+    throw error;
   }
 };
 
-// Get transaction details using Blockstream API (fallback)
+// Get transaction details using Blockstream API (only used if specifically requested)
 export const getTransactionDetailsFromBlockstream = async (txId: string) => {
   try {
+    console.log(`Fetching transaction ${txId} from Blockstream...`);
     const response = await fetch(`${BLOCKSTREAM_API}/tx/${txId}`);
     
     if (!response.ok) {
+      console.error(`Blockstream API error: ${response.status} ${response.statusText}`);
       throw new Error(`Failed to fetch transaction details from Blockstream: ${response.statusText}`);
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log('Blockstream transaction data:', data);
+    return data;
   } catch (error) {
     console.error('Error fetching transaction details from Blockstream:', error);
     throw error;
@@ -42,43 +50,25 @@ export const getTransactionDetailsFromBlockstream = async (txId: string) => {
 // Verify OP_RETURN data in a transaction
 export const verifyOpReturn = async (txId: string, expectedData: string): Promise<boolean> => {
   try {
-    // First try Blockcypher API (primary)
-    try {
-      const txBlockcypher = await getTransactionDetails(txId);
-      
-      // Look for OP_RETURN outputs in Blockcypher format
-      if (txBlockcypher && txBlockcypher.outputs) {
-        for (const output of txBlockcypher.outputs) {
-          if (
-            output.script_type === 'null-data' && 
-            output.data_hex && 
-            hexToAscii(output.data_hex).includes(expectedData)
-          ) {
-            return true;
-          }
-        }
-      }
-    } catch (blockcypherError) {
-      console.log('Blockcypher verification failed, trying Blockstream...', blockcypherError);
-      // If Blockcypher fails, we continue to try Blockstream
-    }
-
-    // If we reach here, try with Blockstream API
-    const tx = await getTransactionDetailsFromBlockstream(txId);
+    // Only use BlockCypher API now
+    console.log(`Verifying OP_RETURN for transaction ${txId}, expecting: ${expectedData}`);
+    const txBlockcypher = await getTransactionDetails(txId);
     
-    // Look for OP_RETURN outputs in Blockstream format
-    if (tx && tx.vout) {
-      for (const output of tx.vout) {
+    // Look for OP_RETURN outputs in Blockcypher format
+    if (txBlockcypher && txBlockcypher.outputs) {
+      for (const output of txBlockcypher.outputs) {
         if (
-          output.scriptpubkey_type === 'op_return' && 
-          output.scriptpubkey_asm.includes('OP_RETURN') && 
-          output.scriptpubkey_asm.includes(expectedData)
+          output.script_type === 'null-data' && 
+          output.data_hex && 
+          hexToAscii(output.data_hex).includes(expectedData)
         ) {
+          console.log('OP_RETURN verification succeeded with BlockCypher');
           return true;
         }
       }
     }
     
+    console.log('OP_RETURN verification failed: expected data not found');
     return false;
   } catch (error) {
     console.error('Error verifying OP_RETURN:', error);
